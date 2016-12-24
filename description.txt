@@ -1,0 +1,3 @@
+Title: Throwable Weapons
+Author: Jack Noir
+Bunch o throwable weapons designed with Weapon_Melee_Base balance in mind
