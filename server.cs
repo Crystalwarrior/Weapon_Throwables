@@ -19,6 +19,57 @@ if(%error == $Error::AddOn_NotFound)
 exec("./hitregion.cs");
 exec("./weapon_throwing_knife.cs");
 
+datablock ParticleData(RangedBloodExplosionParticle)
+{
+	dragCoefficient      = 0;
+	gravityCoefficient   = 5.0;
+	inheritedVelFactor   = 0.0;
+	constantAcceleration = 0.0;
+	lifetimeMS           = 200;
+	lifetimeVarianceMS   = 60;
+	textureName          = "base/data/particles/chunk";
+	spinSpeed		= 10.0;
+	spinRandomMin		= -500.0;
+	spinRandomMax		= 500.0;
+	colors[0]     = "0.71 0.01 0.01 0.9";
+	colors[1]     = "0.71 0.01 0.01 0.6";
+	sizes[0]      = 0.1;
+	sizes[1]      = 0.1;
+	useInvAlpha = true;
+};
+datablock ParticleEmitterData(RangedBloodExplosionEmitter)
+{
+   ejectionPeriodMS = 15;
+   periodVarianceMS = 2;
+   ejectionVelocity = 8;
+   velocityVariance = 2;
+   ejectionOffset   = 0.0;
+   thetaMin         = 0;
+   thetaMax         = 20;
+   phiReferenceVel  = 0;
+   phiVariance      = 25;
+   overrideAdvance = false;
+   particles = "RangedBloodExplosionParticle";
+};
+
+datablock ExplosionData(RangedBloodExplosion)
+{
+	// soundProfile = bullethitSound;
+	lifeTimeMS = 150;
+	particleEmitter = RangedBloodExplosionEmitter;
+	particleDensity = 5;
+	particleRadius = 0.1;
+	faceViewer     = true;
+	explosionScale = "1 1 1";
+	shakeCamera = false;
+	camShakeFreq = "0.0 1.0 1.0";
+	camShakeAmp = "0.0 3.0 2.5";
+	camShakeDuration = 0.5;
+	camShakeRadius = 0.5;
+	lightStartRadius = 0;
+	lightEndRadius = 0;
+};
+
 datablock AudioProfile(spearGore1)
 {
 	filename	= "./sounds/Thrown_Spear_gore_01.wav";

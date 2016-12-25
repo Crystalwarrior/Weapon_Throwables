@@ -72,7 +72,7 @@ datablock ProjectileData(ThrowKnifeProjectile)
 	directDamageType		= $DamageType::Direct;
 	radiusDamageType		= $DamageType::Direct;
 	stickExplosion			= ThrowKnifeStickExplosion;
-	bloodExplosion			= MeleeBloodExplosion;
+	bloodExplosion			= RangedBloodExplosion;
 	explosion				= arrowExplosion;
 	muzzleVelocity			= 65;
 	velInheritFactor		= 1;
