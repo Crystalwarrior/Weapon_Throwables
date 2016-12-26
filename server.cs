@@ -15,10 +15,6 @@ if(%error == $Error::AddOn_NotFound)
 	error("ERROR: Weapon_Throwables - required add-on Weapon_Bow not found");
 	return;
 }
-
-exec("./hitregion.cs");
-exec("./weapon_throwing_knife.cs");
-
 datablock ParticleData(RangedBloodExplosionParticle)
 {
 	dragCoefficient      = 0;
@@ -100,3 +96,6 @@ datablock AudioProfile(spearGore5)
 	description	= AudioClosest3d;
 	preload		= true;
 };
+
+exec("./hitregion.cs");
+exec("./weapon_throwing_knife.cs");
