@@ -15,6 +15,9 @@ if(%error == $Error::AddOn_NotFound)
 	error("ERROR: Weapon_Throwables - required add-on Weapon_Bow not found");
 	return;
 }
+
+if($Pref::Server::Ranged::Ammo["knives"] $= "") $Pref::Server::Ranged::Ammo["knives"] = 20;
+
 datablock ParticleData(RangedBloodExplosionParticle)
 {
 	dragCoefficient      = 0;
@@ -99,3 +102,103 @@ datablock AudioProfile(spearGore5)
 
 exec("./hitregion.cs");
 exec("./weapon_throwing_knife.cs");
+
+function Player::updateDisplayAmmo(%this, %disable, %forceType)
+{
+	if(!isObject(%this.client))
+		return;
+	%image = %this.getMountedImage(0);
+	if(%disable || (!isObject(%image) && %forceType $= ""))
+	{
+		clearBottomPrint(%this.client);
+		return;
+	}
+	%ammoType = %image.item.ammoType;
+	if(%forceType !$= "") %ammoType = %forceType;
+	%str = %ammoType SPC %this.ammo[%ammoType];
+	%delay = 0;
+	if(!isObject(%image))
+		%delay = 2;
+	%this.client.bottomPrint("<font:BrowalliaUPC:30><just:right><color:FFFFFF>" @ %str SPC "\n", %delay, 1);
+}
+
+package RPRangedPackage
+{
+	function Armor::onCollision(%this, %obj, %col, %velocity, %speed)
+	{
+		if (isObject(%col) && %col.getClassName() $= "Item" && %col.getDataBlock().ammoType !$= "")
+		{
+			%obj.pickup(%col);
+			return;
+		}
+		Parent::onCollision(%this, %obj, %col, %velocity, %speed);
+	}
+	function Player::pickUp(%obj, %item)
+	{
+		%data = %item.getDatablock();
+		if(%data.ammoType !$= "")
+		{
+			for(%i=0;%i<%obj.getDatablock().maxTools;%i++)
+			{
+				if(isObject(%obj.tool[%i]))
+				{
+					%tool=%obj.tool[%i];
+					if(%tool.ammoType $= %data.ammoType)
+					{
+						%found = %tool;
+					}
+				}
+			}
+			%ammo = %item.ammo;
+			if(%item.ammo $= "")
+				%ammo = $Pref::Server::Ranged::Ammo[%data.ammoType];
+			if(%obj.ammo[%data.ammoType] >= $Pref::Server::Ranged::Ammo[%data.ammoType])
+				return !%found;
+
+			if(%ammo > 0 && %obj.ammo[%data.ammoType] <= 0 && isObject(%img = %obj.getMountedImage(0)) && %img.item.getID() == %found.getID())
+				%obj.setImageLoaded(0, 1);
+
+			%obj.ammo[%data.ammoType] = getMin($Pref::Server::Ranged::Ammo[%data.ammoType], %obj.ammo[%data.ammoType] + %ammo);
+			%obj.updateDisplayAmmo(0, %data.ammoType);
+			if(%ammo <= 0)
+				return parent::pickUp(%obj, %item);
+
+			if(%found)
+			{
+				if(isObject(%item.spawnBrick))
+				{
+					%item.fadeOut();
+					%item.schedule(%item.spawnBrick.itemRespawnTime, fadeIn);
+				}
+				else
+					%item.delete();
+				return;
+			}
+		}
+		parent::pickUp(%obj, %item);
+	}
+
+	function ItemData::onAdd(%this, %obj)
+	{
+		Parent::onAdd(%this, %obj);
+
+		if ($DroppedAmmo !$= "")
+		{
+			%obj.ammo = $DroppedAmmo;
+			$DroppedAmmo = "";
+		}
+	}
+
+	function serverCmdDropTool(%client, %index)
+	{
+		%player = %client.player;
+
+		$DroppedAmmo = %player.ammo[%player.tool[%index].ammoType];
+		%player.ammo[%player.tool[%index].ammoType] = "";
+
+		Parent::serverCmdDropTool(%client, %index);
+
+		$DroppedAmmo = "";
+	}
+};
+activatePackage(RPRangedPackage);

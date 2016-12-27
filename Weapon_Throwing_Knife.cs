@@ -119,6 +119,8 @@ datablock ItemData(ThrowKnifeItem)
 	 // Dynamic properties defined by the scripts
 	image = ThrowKnifeImage;
 	canDrop = true;
+
+	ammoType = "knives"; //ammo type
 };
 
 //function spear::onUse(%this,%user)
@@ -221,8 +223,31 @@ datablock ShapeBaseImageData(ThrowKnifeImage)
 
 function ThrowKnifeImage::onMount(%this, %obj, %slot)
 {
+	if(%obj.ammo[%this.item.ammoType] $= "")
+		%obj.ammo[%this.item.ammoType] = $Pref::Server::Ranged::Ammo[%this.item.ammoType];
+	if(%obj.ammo[%this.item.ammoType] <= 0)
+	{
+		%obj.tool[%obj.currTool] = 0;
+		if (isObject(%obj.client))
+			messageClient(%obj.client, 'MsgItemPickup', '', %obj.currTool, 0, true);
+		%obj.unMountImage(%slot);
+		%obj.ammo[%this.item.ammoType] = "";
+		return 0;
+	}
 	parent::onMount(%this, %obj, %slot);
 	fixArmReady(%obj);
+	%obj.updateDisplayAmmo();
+}
+
+function ThrowKnifeImage::onUnMount(%this, %obj, %slot)
+{
+	%obj.updateDisplayAmmo(1);
+	if(%obj.ammo[%this.item.ammoType] <= 0)
+	{
+		%obj.tool[%obj.currTool] = 0;
+		if (isObject(%obj.client))
+			messageClient(%obj.client, 'MsgItemPickup', '', %obj.currTool, 0, true);
+	}
 }
 
 function ThrowKnifeImage::onCharge(%this, %obj, %slot)
@@ -235,6 +260,17 @@ function ThrowKnifeImage::onCharge(%this, %obj, %slot)
 
 function ThrowKnifeImage::onCharging(%this, %obj, %slot)
 {
+	if(%obj.ammo[%this.item.ammoType] <= 0)
+	{
+		%obj.tool[%obj.currTool] = 0;
+		if (isObject(%obj.client))
+			messageClient(%obj.client, 'MsgItemPickup', '', %obj.currTool, 0, true);
+		%obj.unMountImage(%slot);
+		%obj.ammo[%this.item.ammoType] = "";
+		%obj.playthread(2, root);
+		return 0;
+	}
+
 	if(%obj.getDatablock().shapeFile $= "base/data/shapes/player/mmelee.dts")
 		%obj.playthread(2, tswing3);
 	else
@@ -249,10 +285,27 @@ function ThrowKnifeImage::onAbortCharge(%this, %obj, %slot)
 function ThrowKnifeImage::onReady(%this, %obj, %slot)
 {
 	%obj.playthread(2, root);
+	if(%obj.ammo[%this.item.ammoType] <= 0)
+	{
+		%obj.tool[%obj.currTool] = 0;
+		if (isObject(%obj.client))
+			messageClient(%obj.client, 'MsgItemPickup', '', %obj.currTool, 0, true);
+		%obj.unMountImage(%slot);
+	}
 }
 
 function ThrowKnifeImage::onFire(%this, %obj, %slot)
 {
+	if(%obj.ammo[%this.item.ammoType] <= 0)
+	{
+		%obj.tool[%obj.currTool] = 0;
+		if (isObject(%obj.client))
+			messageClient(%obj.client, 'MsgItemPickup', '', %obj.currTool, 0, true);
+		%obj.unMountImage(%slot);
+		%obj.ammo[%this.item.ammoType] = "";
+		return 0;
+	}
+
 	if(%obj.getDatablock().shapeFile $= "base/data/shapes/player/mmelee.dts")
 	{
 		%obj.playthread(2, tswing4);
@@ -261,6 +314,8 @@ function ThrowKnifeImage::onFire(%this, %obj, %slot)
 	else
 		%obj.playthread(3, SpearThrow);
 	serverPlay3D(knifeThrow @ getRandom(1, 2), %obj.getSlotTransform(%slot));
+	%obj.ammo[%this.item.ammoType]--;
+	%obj.updateDisplayAmmo();
 	Parent::OnFire(%this, %obj, %slot);
 }
 
