@@ -138,6 +138,8 @@ package RPRangedPackage
 		%data = %item.getDatablock();
 		if(%data.ammoType !$= "")
 		{
+			if(isEventPending(%item.fadeInSchedule))
+				return;
 			for(%i=0;%i<%obj.getDatablock().maxTools;%i++)
 			{
 				if(isObject(%obj.tool[%i]))
@@ -153,9 +155,9 @@ package RPRangedPackage
 			if(%item.ammo $= "")
 				%ammo = $Pref::Server::Ranged::Ammo[%data.ammoType];
 			if(%obj.ammo[%data.ammoType] >= $Pref::Server::Ranged::Ammo[%data.ammoType])
-				return !%found;
+				return !%found ? parent::pickUp(%obj, %item) : 0;
 
-			if(%ammo > 0 && %obj.ammo[%data.ammoType] <= 0 && isObject(%img = %obj.getMountedImage(0)) && %img.item.getID() == %found.getID())
+			if(%ammo > 0 && %obj.ammo[%data.ammoType] <= 0 && isObject(%img = %obj.getMountedImage(0)) && isObject(%found) && %img.item.getID() == %found.getID())
 				%obj.setImageLoaded(0, 1);
 
 			%obj.ammo[%data.ammoType] = getMin($Pref::Server::Ranged::Ammo[%data.ammoType], %obj.ammo[%data.ammoType] + %ammo);
