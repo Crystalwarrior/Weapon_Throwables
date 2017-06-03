@@ -140,6 +140,7 @@ package RPRangedPackage
 		{
 			if(isEventPending(%item.fadeInSchedule))
 				return;
+			%slot = -1;
 			for(%i=0;%i<%obj.getDatablock().maxTools;%i++)
 			{
 				if(isObject(%obj.tool[%i]))
@@ -150,7 +151,11 @@ package RPRangedPackage
 						%found = %tool;
 					}
 				}
+				else
+					%slot = %i;
 			}
+			if(%slot == -1 && !%found) //Haven't found any empty slots or the type of weapon itself, return so we don't infini-ammo
+				return;
 			%ammo = %item.ammo;
 			if(%item.ammo $= "")
 				%ammo = $Pref::Server::Ranged::Ammo[%data.ammoType];
@@ -203,4 +208,4 @@ package RPRangedPackage
 		$DroppedAmmo = "";
 	}
 };
-activatePackage(RPRangedPackage);
+schedule(0, 0, activatePackage, RPRangedPackage); //schedule it so it isn't overwritten by every other package

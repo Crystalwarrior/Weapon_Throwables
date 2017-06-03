@@ -68,13 +68,13 @@ datablock ExplosionData(ThrowKnifeStickExplosion : arrowStickExplosion)
 datablock ProjectileData(ThrowKnifeProjectile)
 {
 	projectileShapeName		= "./throwingknife_proj.dts";
-	directDamage			= 20;
+	directDamage			= 10;
 	directDamageType		= $DamageType::Direct;
 	radiusDamageType		= $DamageType::Direct;
 	stickExplosion			= ThrowKnifeStickExplosion;
 	bloodExplosion			= RangedBloodExplosion;
 	explosion				= arrowExplosion;
-	muzzleVelocity			= 65;
+	muzzleVelocity			= 45;
 	velInheritFactor		= 1;
 	explodeOnPlayerImpact	= true;
 	explodeOnDeath			= true;
@@ -87,7 +87,7 @@ datablock ProjectileData(ThrowKnifeProjectile)
 	minStickVelocity		= 10;
 	bounceElasticity		= 0.2;
 	bounceFriction			= 0.01;   
-	gravityMod				= 1.0;
+	gravityMod				= 2.0;
 
 	hasLight				= false;
 
